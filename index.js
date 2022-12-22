@@ -163,3 +163,5 @@ classManager.updateProduct(1,{stock:700})
 
 //Se llama al método deleteProduct para eliminar un producto. En caso de no existir el método arroja error
 classManager.deleteProduct(1)
+
+asd
