@@ -1,81 +1,165 @@
-//Se crea una clase ProductManager para gestionar un conjunto de productos
+const { Console } = require('console');
+const fs = require('fs');
+let route = '';
 
+//Se crea una clase ProductManager para gestionar un conjunto de productos
 class ProductManager {
   products;
   static id = 1;
-  constructor(title,description,price,thumbnail,code,stock,id) {
+  constructor(filePath) {
     this.products=[];
-    this.title = title;
-    this.description = description;
-    this.price = price;
-    this.thumbnail = thumbnail;
-    this.code = code;
-    this.stock =stock;
-    this.id = id;
-  }
+    this.filePath = filePath;
+}
 
-//Método addProduct el cual agregará un producto al arreglo de productos inicial.  
-  addProduct(item){
-    let findResult = classManager.products.find((product)=>product.code == (item.code))
-//Validación de id (que no se repita) y campos del producto.
-    if(findResult == undefined){
-      if(item.title == null || item.title == "" ){
-        console.log("titulo incompleto")
-      }
-      else if(item.description == null || item.description == "" ){
-        console.log("descripción incompleta")
-      }
-      else if(item.price == null || item.price == "" ){
-        console.log("Precio incorrecto")
-      }
-      else if(item.thumbnail == null || item.thumbnail == "" ){
-        console.log("Miniatura incorrecta")
-      }
-      else if(item.stock == null || item.stock == "" ){
-        console.log("Stock incompleto")
-      }
-      else{
-        item = {...item, id: ProductManager.id++}
-      classManager.products.push(item)
+  #readContent(){
+  let content = fs.readFileSync(this.filePath,'utf-8')
+  try{
+    let contentParse = JSON.parse(content)
+    return(contentParse)
+  }
+  catch{
+    console.log("read content error")
+  }
+}
+
+  #writeData(data){
+  let writeData = fs.writeFileSync(this.filePath,JSON.stringify(data))
+  try{
+    return writeData
+  }
+  catch{
+    console.log("writeData Error")
+  }
+}
+
+ addProduct(item){
+    let array = this.#readContent()
+    let codeFind =  array.products.find((product)=>product.code == item.code)    
+    if(codeFind != undefined){
+      console.log("El código del producto ya se encuentra en el listado")
     }
+    else if(!!!item.title || !!!item.description || !!!item.price || !!!item.thumbnail|| !!!item.code || !!!item.stock ){
+      console.log("Para agregar un producto debe completar todos los campos( title, description,price,thumbnail,code y stock)")    
     }
     else{
-      console.log("El producto ya se encuentra en el listado")
+      item={
+        title: item.title,
+        description: item.description,
+        price: item.price,
+        thumbnail: item.thumbnail,
+        code:item.code,
+        stock:item.stock,
+        id:ProductManager.id++
+      }
+
+      try{
+        array.products.push(item)
+        this.#writeData(array)
+      }
+      catch{
+        console.log("addProduct Error")
+      }
+
     }
+
+
+}
+
+//Método getProducts el cual lee el archivo de productos y devuelve todos los productos en formato arreglo.
+  getProducts(){
+  try{
+    console.log(this.#readContent())
+    return this.#readContent()
   }
-
-//Método getProducts el cual devuelve el arreglo con los productos creados hasta el momento.  
-  getProducts() {
-    return this.products;
+  catch{
+    console.log("getProducts Error")
   }
+}
 
-//Método getProductsById el cual buscá si el producto se encuentra en el array por su Id
-
-  getProductById(id) {
-  let findIdResult = this.products.find((product)=>product.id == id)
-  if(findIdResult != undefined){
-    return findIdResult
+//Método getProductById el cual lee el archivo de productos y devuelve el producto con el Id indicado por parámetro
+getProductById(id){
+  let array = this.#readContent()
+  let productFind = array.products.find((product)=>product.id == id)
+  if(productFind == undefined){
+    console.log("El producto no se encuentra en el listado")
   }
   else{
-    return "Id not found"
+    console.log(productFind)
+    return (productFind)
+  }
+}
+
+//Método updateProduct el cual actualiza los campos de un producto.
+updateProduct(id,obj){
+  let array = this.#readContent().products
+  let update = array.map((product)=>product.id === id? {...product,...obj}:product)
+  if(!array.find((obj)=>obj.id===id)) throw new Error("No se encuentra el producto con la Id indicada")
+  else{
+    this.#writeData(update)
+  }
+}
+
+
+//Método deleteProduct el cual borra un producto del array products.
+deleteProduct(id){
+  let array = this.#readContent()
+  console.log(array)
+  let arrayFind = array.products.find(product=>product.id===id)
+  if (arrayFind==undefined){
+    console.log("El producto no se encuentra en el listado")
+  }
+  else{
+    let deleteProduct = array.products.filter((product)=>product.id != id)
+    array.products = [...deleteProduct]
+    classManager.#writeData(array)
   }
 }}
 
-//Testing
-//Se crea la instancia classManager, la cual contiene un array vacío en primera instancia.
-let classManager = new ProductManager();
-console.log(classManager.getProducts())
+// Se crea la subclase Product que extiende Product Manager.
+class Product extends ProductManager{
+  constructor(title,description,price,thumbnail,code,stock){
+    super()
+    this.title=title,
+    this.description=description,
+    this.price=price,
+    this.thumbnail=thumbnail,
+    this.code=code,
+    this.stock=stock
+  }
+}
 
-//Se crea un primer producto de prueba y se utiliza el método addProduct para subirlo al array
-const prod1 = new ProductManager ("Producto prueba", "Este es un producto prueba", 200, "Sin Imagen","abc123",25)
+// A través de la función createPath se crea el archivo classManager.json para lograr persistencia de datos.
+function createPath(){
+  if(!fs.existsSync('./classManager.json')){
+    fs.writeFileSync('./classManager.json','')    
+}
+route = './classManager.json';
+}
+createPath()
+
+
+//Testing  
+//Se intancia la clase y se asigna la ruta a trabajar
+
+let classManager = new ProductManager(route)
+fs.writeFileSync(route,JSON.stringify(classManager))
+
+//Se llama el método getProduct recién creada la instancia devolviendo un arreglo vacío
+classManager.getProducts()
+
+//Se llama el método addProduct para agregar un primer producto .
+prod1 = new Product("Producto prueba", "Esto es un producto prueba", 200, "Sin imagen","abc1234", 20)
 classManager.addProduct(prod1)
-console.log(classManager.getProducts())
 
-//Se crea un segundo producto con las mismas propiedades, siendo esto detectado y devolviéndose la alerta pertinente. 
-const prod2 = new ProductManager ("Producto prueba", "Este es un producto prueba", 200, "Sin Imagen","abc123",25)
-classManager.addProduct(prod2)
+//Se llama al método getProducts para comprobar el producto recién agregado
+classManager.getProducts()
 
+//Se llama el método getProductByID y se testea los casos en los cuales exista o no la Id
+classManager.getProductById(1)
+classManager.getProductById(2)
 
-// Testing de getProductById para el caso de que el producto se encuentre en el array o no.
-console.log(classManager.getProductById(1))
-console.log(classManager.getProductById(2))
+//Método updateProduct permite modificar campos del producto
+classManager.updateProduct(1,{stock:700})
+
+//Se llama al método deleteProduct para eliminar un producto. En caso de no existir el método arroja error
+//classManager.deleteProduct(1)

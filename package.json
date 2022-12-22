@@ -1,0 +1,23 @@
+{
+  "name": "segundo-entregable",
+  "version": "1.0.0",
+  "description": "segundo desafio backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mishainx/backend-2da-entrega.git"
+  },
+  "keywords": [
+    "file",
+    "system"
+  ],
+  "author": "Fernando Rivero",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mishainx/backend-1era-entrega/issues"
+  },
+  "homepage": "https://github.com/Mishainx/backend-1era-entrega#readme"
+}
