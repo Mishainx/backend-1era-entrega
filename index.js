@@ -90,11 +90,12 @@ getProductById(id){
 
 //Método updateProduct el cual actualiza los campos de un producto.
 updateProduct(id,obj){
-  let array = this.#readContent().products
-  let update = array.map((product)=>product.id === id? {...product,...obj}:product)
-  if(!array.find((obj)=>obj.id===id)) throw new Error("No se encuentra el producto con la Id indicada")
+  let array = this.#readContent()
+  let arrayProducts = array.products.map((product)=>product.id === id? {...product,...obj}:product)
+  array.products = arrayProducts
+  if(!array.products.find((obj)=>obj.id===id)) throw new Error("No se encuentra el producto con la Id indicada")
   else{
-    this.#writeData(update)
+    this.#writeData(array)
   }
 }
 
@@ -128,20 +129,20 @@ class Product extends ProductManager{
 }
 
 // A través de la función createPath se crea el archivo classManager.json para lograr persistencia de datos.
-/*function createPath(){
+function createPath(){
   if(!fs.existsSync('./classManager.json')){
     fs.writeFileSync('./classManager.json','')    
 }
 route = './classManager.json';
 }
-createPath()*/
+createPath()
 
 
 //Testing  
 //Se intancia la clase y se asigna la ruta a trabajar
 
-let classManager = new ProductManager('./classManager.json')
-fs.writeFileSync('./classManager.json',JSON.stringify(classManager))
+let classManager = new ProductManager(route)
+fs.writeFileSync(route,JSON.stringify(classManager))
 
 //Se llama el método getProduct recién creada la instancia devolviendo un arreglo vacío
 classManager.getProducts()
@@ -157,7 +158,7 @@ classManager.getProducts()
 classManager.getProductById(1)
 classManager.getProductById(2)
 
-//Método updateProduct permite modificar campos del producto
+//Método updateProduct permite modificar campos del producto(modificación de stock)
 classManager.updateProduct(1,{stock:700})
 
 //Se llama al método deleteProduct para eliminar un producto. En caso de no existir el método arroja error
