@@ -1,6 +1,5 @@
-const { Console } = require('console');
+
 const fs = require('fs');
-let route = '';
 
 //Se crea una clase ProductManager para gestionar un conjunto de productos
 class ProductManager {
@@ -111,7 +110,7 @@ deleteProduct(id){
   else{
     let deleteProduct = array.products.filter((product)=>product.id != id)
     array.products = [...deleteProduct]
-    classManager.#writeData(array)
+    this.#writeData(array)
   }
 }}
 
@@ -129,20 +128,20 @@ class Product extends ProductManager{
 }
 
 // A través de la función createPath se crea el archivo classManager.json para lograr persistencia de datos.
-function createPath(){
+/*function createPath(){
   if(!fs.existsSync('./classManager.json')){
     fs.writeFileSync('./classManager.json','')    
 }
 route = './classManager.json';
 }
-createPath()
+createPath()*/
 
 
 //Testing  
 //Se intancia la clase y se asigna la ruta a trabajar
 
-let classManager = new ProductManager(route)
-fs.writeFileSync(route,JSON.stringify(classManager))
+let classManager = new ProductManager('./classManager.json')
+fs.writeFileSync('./classManager.json',JSON.stringify(classManager))
 
 //Se llama el método getProduct recién creada la instancia devolviendo un arreglo vacío
 classManager.getProducts()
@@ -162,4 +161,4 @@ classManager.getProductById(2)
 classManager.updateProduct(1,{stock:700})
 
 //Se llama al método deleteProduct para eliminar un producto. En caso de no existir el método arroja error
-//classManager.deleteProduct(1)
+classManager.deleteProduct(1)
